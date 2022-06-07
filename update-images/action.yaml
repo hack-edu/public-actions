@@ -1,0 +1,52 @@
+name: Skaffold Update Kustomize
+description: |
+  Updates kustomize images using skaffold build output. It is fairly common
+  to have a kustomize deployment that uses one or more images built
+  by skaffold. This action should be run in the kustomization directory
+  where the images should be updated.
+
+inputs:
+  image-mapping:
+    description: >-
+      YAML mapping of the kustomize image name to a regex pattern to match against
+      the skaffold imageName.
+    required: true
+  build-json:
+    description: |
+      JSON output from skaffold build --quiet. 
+      If empty, skaffold build --quiet --dry-run is run.
+    required: false
+    default: ''
+  build-directory:
+    default: .
+    required: false
+    description: |
+      The directory containing skaffold.yaml
+  working-directory:
+    default: .
+    required: false
+    description: |
+      The working directory to run the kustomize commands in.
+  build-args:
+    description: |
+      Arguments to pass to skaffold build.
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Install skaffold & kustomize (if needed)
+      run: |
+        (! command -v skaffold >&2) && curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && \
+          sudo install skaffold /usr/local/bin/
+        (! command -v kustomize >&2) && curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
+      shell: bash
+
+    - run: >-
+        IMAGE_MAPPING="${{ inputs.image-mapping }}" 
+        BUILD_JSON="${{ inputs.build-json }}" 
+        BUILD_DIR="${{ inputs.build-directory }}" 
+        ${{ github.action_path }}/update.sh ${{ inputs.build-args }}
+      working-directory: ${{ inputs.working-directory }}
+      shell: bash
