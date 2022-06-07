@@ -4,6 +4,10 @@ set -eou pipefail
 
 DEBUG="${DEBUG:-/dev/null}"
 
+if [ "$DEBUG" != "/dev/null" ]; then
+  set -x
+fi
+
 env > "$DEBUG"
 
 # skaffold build if JSON is missing
