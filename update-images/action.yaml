@@ -32,6 +32,11 @@ inputs:
       Arguments to pass to skaffold build.
     required: false
     default: ''
+  debug:
+    description: |
+      Where to output debug information. e.g., /dev/stderr
+    required: false
+    default: "/dev/null"
 
 runs:
   using: composite
@@ -46,6 +51,7 @@ runs:
     - run: >-
         IMAGE_MAPPING="${{ inputs.image-mapping }}" 
         BUILD_JSON="${{ inputs.build-json }}" 
+        DEBUG="${{ inputs.debug }}"
         BUILD_DIR="${{ inputs.build-directory }}" 
         ${{ github.action_path }}/update.sh ${{ inputs.build-args }}
       working-directory: ${{ inputs.working-directory }}

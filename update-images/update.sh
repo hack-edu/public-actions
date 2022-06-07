@@ -2,10 +2,16 @@
 
 set -eou pipefail
 
+DEBUG="${DEBUG:-/dev/null}"
+
+env > "$DEBUG"
+
 # skaffold build if JSON is missing
 if [ x = x"${BUILD_JSON:-}" ]; then
   pushd "${BUILD_DIR:-.}" &> /dev/null || exit 1
-  BUILD_JSON="$(skaffold build "$@" --quiet | tee /dev/stderr)"
+  skaffold version > "${DEBUG}"
+  echo "skaffold build ${*} --quiet " > "${DEBUG}"
+  BUILD_JSON="$(skaffold build "$@" --quiet | tee "$DEBUG")"
   popd &> /dev/null || exit 1
 fi
 
@@ -15,7 +21,7 @@ CMDS="$(
     . as $build | ($images | to_entries[] |
         select(. as $e | $build.imageName | test($e.value))
             | .key) as $name |
-          "kustomize edit set image \("\($name)=\(.tag)" | @sh)"' | tee /dev/stderr)"
+          "kustomize edit set image \("\($name)=\(.tag)" | @sh)"' | tee "$DEBUG")"
 
 if [ x = x"${DRY_RUN:-}" ]; then
   eval "$CMDS"
