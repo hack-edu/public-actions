@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
+set -eou pipefail
+
 # skaffold build if JSON is missing
-if [ x = x"${BUILD_JSON}" ]; then
+if [ x = x"${BUILD_JSON:-}" ]; then
   pushd "${BUILD_DIR:-.}" &> /dev/null || exit 1
   BUILD_JSON="$(skaffold build "$@" --quiet | tee /dev/stderr)"
   popd &> /dev/null || exit 1
