@@ -6,6 +6,7 @@ DEBUG="${DEBUG:-/dev/null}"
 
 if [ "$DEBUG" != "/dev/null" ]; then
   set -x
+  set - "-vdebug" "$@"
 fi
 
 env > "$DEBUG"
@@ -14,7 +15,6 @@ env > "$DEBUG"
 if [ x = x"${BUILD_JSON:-}" ]; then
   pushd "${BUILD_DIR:-.}" &> /dev/null || exit 1
   skaffold version > "${DEBUG}"
-  echo "skaffold build ${*} --quiet " > "${DEBUG}"
   BUILD_JSON="$(skaffold build "$@" --quiet | tee "$DEBUG")"
   popd &> /dev/null || exit 1
 fi
