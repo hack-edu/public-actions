@@ -25,7 +25,8 @@ CMDS="$(
     . as $build | ($images | to_entries[] |
         select(. as $e | $build.imageName | test($e.value))
             | .key) as $name |
-          "kustomize edit set image \("\($name)=\(.tag)" | @sh)"' | tee "$DEBUG")"
+          # remove the digest from the image as it causes kustomize to include the tag in the name and confuses skaffold
+          "kustomize edit set image \("\($name)=\(.tag | split("@") | .[0])" | @sh)"' | tee "$DEBUG")"
 
 if [ x = x"${DRY_RUN:-}" ]; then
   eval "$CMDS"
