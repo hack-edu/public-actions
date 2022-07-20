@@ -21,17 +21,27 @@ inputs:
     default: .
     required: false
     description: |
-      The directory containing skaffold.yaml
+      The directory containing skaffold.yaml. Must not be quoted.
   working-directory:
     default: .
     required: false
     description: |
-      The working directory to run the kustomize commands in.
+      The working directory to run the kustomize commands in. Must not be quoted.
   build-args:
     description: |
       Arguments to pass to skaffold build.
     required: false
     default: ''
+  env:
+    description: |
+      Environment variables for the build in KEY1=VALUE1 KEY2="VALUE 2" format.
+    required: false
+    default: ''
+  tag-filter:
+    description: |
+      By default sets the image tag in kustomize. Set to "digest" to use the image digest instead.
+    required: false
+    default: ""
   debug:
     description: |
       Where to output debug information. e.g., /dev/stderr
@@ -49,10 +59,11 @@ runs:
       shell: bash
 
     - run: >-
-        IMAGE_MAPPING="${{ inputs.image-mapping }}" 
-        BUILD_JSON="${{ inputs.build-json }}" 
+        IMAGE_MAPPING='${{ inputs.image-mapping }}' 
+        BUILD_JSON='${{ inputs.build-json }}' 
         DEBUG="${{ inputs.debug }}"
         BUILD_DIR="${{ inputs.build-directory }}" 
+        ${{ inputs.env }}
         ${{ github.action_path }}/update.sh ${{ inputs.build-args }}
       working-directory: ${{ inputs.working-directory }}
       shell: bash
